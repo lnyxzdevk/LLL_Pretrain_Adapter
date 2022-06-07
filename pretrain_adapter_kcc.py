@@ -158,13 +158,13 @@ def get_return_layers():
 def ssl(dataloader, device, tasks, current_task, task_list):
     pretrained_adapter = {}
     model_name = 'facebook/bart-base'
-    
+
     for task in tasks:
         config = BartConfig.from_pretrained(model_name, num_labels=2)
         model_past = BartForSequenceClassification.from_pretrained(model_name, config=config)
         model_for_ssl = BartForSequenceClassification.from_pretrained(model_name, config=config)
-
-        adapter_dir = './adapters/pretrain_adapter_kcc/' + task + '/'
+        
+        adapter_dir = './adapters/ssl_adapter/' + task + '/'
         model_past.load_adapter(adapter_dir)
 
         model_past.to(device)
@@ -183,23 +183,23 @@ def ssl(dataloader, device, tasks, current_task, task_list):
                 batch = {k:v.type(torch.long).to(device) for k, v in batch.items()}
 
                 model_past.set_active_adapters(task)
-                mid_getter = MidGetter(model_past, return_layers=return_layers, keep_output=False)
-                mid_outputs, _ = mid_getter(**batch)
-
+                mid_getter = MidGetter(model_past, return_layers=return_layers, keep_output=True)
+                mid_outputs, final_output = mid_getter(**batch)
+                
                 mid_getter_for_ssl = MidGetter(model_for_ssl, return_layers=return_layers_for_ssl, keep_output=False)
                 mid_outputs_for_ssl, _ = mid_getter_for_ssl(**batch)
                 optimizer.zero_grad()
                 inp = mid_outputs_for_ssl['model.encoder.layers.0.final_layer_norm'].to(device)
                 layer = 'model.encoder.layers.0.output_adapters.adapters.' + current_task
                 target = mid_outputs[layer][2].to(device)
-                    
+
                 output = ae(inp)
                 output = output.to(device)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
 
-                del batch, mid_getter, mid_getter_for_ssl, mid_outputs, mid_outputs_for_ssl
+                del batch, mid_getter_for_ssl, mid_outputs_for_ssl, mid_getter, mid_outputs
                 gc.collect()
                 torch.cuda.empty_cache()
 
@@ -228,7 +228,7 @@ def main(args, tasks):
         train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=bart_classification_collator, num_workers=4)
 
         if i != 0:
-            pretrained_adapter = ssl(train_dataloader, args.device, [tasks[i-1]], tasks[i])
+            pretrained_adapter = ssl(train_dataloader, args.device, [tasks[i-1]], tasks[i], tasks)
             model.add_adapter(task)
             state_dict = model.state_dict()
             pretrain_layer = list(pretrained_adapter.keys())
@@ -255,7 +255,7 @@ def main(args, tasks):
             pretrain_state_dict = {}
             for layer, param in zip(current_layers, current_params):
                 pretrain_state_dict[layer] = param
-                
+
             model.load_state_dict(pretrain_state_dict, strict=False)
         else:
             model.add_adapter(task)
@@ -290,7 +290,7 @@ def main(args, tasks):
         print('test_loss: %.5f, test_acc: %.5f'%(test_loss, test_acc), file=out)
         at_accuracy[task] = test_acc
 
-        adapter_dir = './adapters/ssl_adapter_new_rep/' + task + '/'
+        adapter_dir = './adapters/ssl_adapter/' + task + '/'
         model.save_adapter(adapter_dir, task)
     
     #Calculate Final ACC
@@ -299,7 +299,7 @@ def main(args, tasks):
         model = BartForSequenceClassification.from_pretrained(model_name, config=config)
         model.resize_token_embeddings(len(tokenizer))
 
-        adapter_dir = './adapters/ssl_adapter_new_rep/' + task + '/'
+        adapter_dir = './adapters/ssl_adapter/' + task + '/'
         model.load_adapter(adapter_dir)
         model.set_active_adapters(task)
         model.to(args.device) 
