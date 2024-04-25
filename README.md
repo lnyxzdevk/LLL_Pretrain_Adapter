@@ -2,7 +2,7 @@
 ## Lifelong Language Learning Using Pretrained Adapters (KCC 2022)
 This paper was submitted to the Korea Computer Congress (KCC), a conference hosted by the Korea Institute of Information Scientists and Engineers (KIISE).
 ### Author
- * Cho Moon Gi [@siryuon](https://github.com/siryuon)
+ * [@sryndevk](https://github.com/sryndevk)
 
 ### Used data
  * [StandardStream](https://github.com/AmanDaVinci/lifelong-learning)
