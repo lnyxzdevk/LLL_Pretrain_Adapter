@@ -1,5 +1,5 @@
-from transformer.src.transformers.models.bart.configuration_bart import BartConfig
-from transformer.src.transformers.models.bart.modeling_bart import BartModel, BartForSequenceClassification
+from transformers.models.bart.configuration_bart import BartConfig
+from transformers.models.bart.modeling_bart import BartModel, BartForSequenceClassification
 from transformers import BartTokenizer, AdamW, get_linear_schedule_with_warmup
 import transformers
 from transformers.activations import get_activation
