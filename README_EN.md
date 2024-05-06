@@ -2,7 +2,7 @@
 ## Lifelong Language Learning Using Pretrained Adapters (KCC 2022)
 This paper was submitted to the Korea Computer Congress (KCC), a conference hosted by the Korea Institute of Information Scientists and Engineers (KIISE).
 ### Author
- * [@lynxzdevk](https://github.com/lynxzdevk)
+ * [@lnyxzdevk](https://github.com/lnyxzdevk)
 
 ### Used data
  * [StandardStream](https://github.com/AmanDaVinci/lifelong-learning)
@@ -39,11 +39,15 @@ This means that the knowledge learned in the previous task will be able to be ac
 
 ### Result Table
 ![image](https://github.com/siryuon/LLL_Pretrain_Adapter/blob/28c0635d07bf2c72877e615e643c525db0723591/images/result.png)
-
+- Finetune: Learning five types of data sequentially
+- Finetune + A: Apply adapter to Finetune method (ultimately create five adapters)
+- STL: Single Task Learning, learning only one data
+- STL + A: Apply adapter to STL method
+  
 ### Conclusion and To Do
  * In this paper, it was shown that using the newly defined adapter pre-learning stage outperformed the existing lifelong language learning baselines. In addition, the performance of the fine-tuning method using the previously proposed adapter was exceeded, and the knowledge learned in the previous task was used to learn the current task, thereby proving the utility of knowledge accumulation.
  * Although this paper tested only one data stream, it is expected that it will show good performance for other data streams as the corresponding data stream contains natural language processing tasks for various purposes.
- * In addition, instead of using only one adapter of the previous task, it is better to study by taking all the previous adapters into consideration and to study how to better utilize the information inherent in each adapter, and to learn by bringing the learning direction of the previous task. A clear analysis of the reasons for the
+ * Additionally, research on how to better utilize the information inherent in each adapter by considering all previous adapters rather than using just one adapter from the previous task, and learning by taking the learning direction of the previous task provides better performance. A clear analysis of the reasons for this is necessary.
 
 ### References
  * Y. Huang et al. Continual learning for text classification with information disentanglement based regularization. In Proceedings of the North American Chapter of the Association for Computational Linguistics (NAACL). 2021.
